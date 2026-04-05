@@ -1,13 +1,27 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const { Server } = require('socket.io');
 
 dotenv.config();
 
+//DB connection
 const connectDB = require('./config/db');
 connectDB();
 
 const app = express();
+const httpServer = http.createServer(app);
+
+//Setup socket.io
+const io = new Server (httpServer, {
+  cors: {
+    origin: process.env.Frontend_URL,
+    methods: ['GET', 'POST'],
+  },
+});
+
+//io available to all controllers
+app.set('io',io);
 
 //Middlewares
 app.use(cors({ origin: process.env.FRONTEND_URL }));
@@ -41,6 +55,15 @@ app.use((err, req, res, next)=>{
   res.status(500).json({
     success: false,
     message: err.message || 'Internal Server Error',
+  });
+});
+
+
+//Socket.io connection
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
   });
 });
 
