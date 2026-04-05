@@ -1,96 +1,178 @@
 const VisitTracking = require('../models/VisitTracking');
 
-const emitCrowdUpdate = async (io) => {
-  const count = await VisitTracking.countDocuments({ status: 'inside' });
-  io.emit('crowdUpdate', { count, timestamp: new Date() });
+const getCrowdStatus = (count) => {
+  if (count > 30) return 'Busy';
+  if (count > 15) return 'Moderate Crowd';
+  return 'Low Crowd';
 };
 
-exports.checkIn = async (req, res) => {
+const emitCrowdUpdate = async (io) => {
+  const count = await VisitTracking.countDocuments({
+    status: 'inside',
+  });
+  io.emit('crowdUpdate', {
+    count,
+    status: getCrowdStatus(count),
+    timestamp: new Date(),
+  });
+};
+
+const checkIn = async (req, res) => {
   try {
     const { userName } = req.body;
-    if (!userName) return res.status(400).json({ success: false, message: 'userName is required' });
 
-    const visit = await VisitTracking.create({ userName, checkInTime: new Date(), status: 'inside' });
+    if (!userName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name is required to check in',
+      });
+    }
+
+    const visit = await VisitTracking.create({
+      userName,
+      checkInTime: new Date(),
+      status: 'inside',
+    });
+
     const io = req.app.get('io');
-    await emitCrowdUpdate(io);
+    if (io) await emitCrowdUpdate(io);
 
-    res.status(201).json({ success: true, data: visit });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(201).json({
+      success: true,
+      message: `${userName} checked in successfully`,
+      data: visit,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-exports.checkOut = async (req, res) => {
+const checkOut = async (req, res) => {
   try {
     const { visitId } = req.body;
+
+    if (!visitId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Visit ID is required to check out',
+      });
+    }
+
     const visit = await VisitTracking.findByIdAndUpdate(
       visitId,
-      { checkOutTime: new Date(), status: 'left' },
+      {
+        checkOutTime: new Date(),
+        status: 'left',
+      },
       { new: true }
     );
-    if (!visit) return res.status(404).json({ success: false, message: 'Visit not found' });
+
+    if (!visit) {
+      return res.status(404).json({
+        success: false,
+        message: 'Visit record not found',
+      });
+    }
 
     const io = req.app.get('io');
-    await emitCrowdUpdate(io);
+    if (io) await emitCrowdUpdate(io);
 
-    res.json({ success: true, data: visit });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(200).json({
+      success: true,
+      message: 'Checked out successfully',
+      data: visit,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-exports.getLiveCrowd = async (req, res) => {
+
+const getLiveCrowd = async (req, res) => {
   try {
-    const count = await VisitTracking.countDocuments({ status: 'inside' });
+
+    const count = await VisitTracking.countDocuments({
+      status: 'inside',
+    });
+
     const recentVisits = await VisitTracking.find({ status: 'inside' })
       .sort({ checkInTime: -1 })
       .limit(10)
       .select('userName checkInTime');
 
-    let status = 'Low Crowd';
-    if (count > 30) status = 'Busy';
-    else if (count > 15) status = 'Moderate Crowd';
+    const capacity = 50;
+    const occupancyPercent = Math.min(
+      Math.round((count / capacity) * 100),
+      100
+    );
 
-    res.json({
+    res.status(200).json({
       success: true,
       data: {
         count,
-        status,
+        status: getCrowdStatus(count),
         recentVisits,
+        capacity,
+        occupancyPercent,
         lastUpdated: new Date(),
-        capacity: 50,
-        occupancyPercent: Math.min(Math.round((count / 50) * 100), 100),
       },
     });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-exports.getAttendanceHistory = async (req, res) => {
+const getAttendanceHistory = async (req, res) => {
   try {
-    const history = await VisitTracking.find().sort({ checkInTime: -1 }).limit(50);
-    res.json({ success: true, data: history });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    const history = await VisitTracking.find()
+      .sort({ checkInTime: -1 })
+      .limit(100);
+
+    res.status(200).json({
+      success: true,
+      count: history.length,
+      data: history,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-exports.getHourlyStats = async (req, res) => {
+const getHourlyStats = async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const visits = await VisitTracking.find({ checkInTime: { $gte: today } });
+    const visits = await VisitTracking.find({
+      checkInTime: { $gte: today },
+    });
 
     const hourlyMap = {};
     for (let h = 6; h <= 22; h++) {
       hourlyMap[h] = 0;
     }
 
-    visits.forEach((v) => {
-      const hour = new Date(v.checkInTime).getHours();
-      if (hourlyMap[hour] !== undefined) hourlyMap[hour]++;
+    visits.forEach((visit) => {
+      const hour = new Date(visit.checkInTime).getHours();
+      if (hourlyMap[hour] !== undefined) {
+        hourlyMap[hour]++;
+      }
     });
 
     const hourlyData = Object.entries(hourlyMap).map(([hour, count]) => ({
@@ -99,8 +181,23 @@ exports.getHourlyStats = async (req, res) => {
       count,
     }));
 
-    res.json({ success: true, data: hourlyData });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(200).json({
+      success: true,
+      data: hourlyData,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
+};
+
+module.exports = {
+  checkIn,
+  checkOut,
+  getLiveCrowd,
+  getAttendanceHistory,
+  getHourlyStats,
 };
