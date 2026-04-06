@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const { Server } = require('socket.io');
+const http = require('http');
 
 dotenv.config();
 
@@ -28,7 +29,7 @@ app.use(cors({ origin: process.env.FRONTEND_URL }));
 app.use(express.json());
 
 //Routes
-app.use('/api/plans', require('./routes/plans'));
+app.use('/api/plans', require('./routes/plan'));
 app.use('/api/bookings',require('./routes/bookings'));
 app.use('/api/trainers',require('./routes/trainers'));
 app.use('/api/trainer-bookings',require('./routes/trainerBookings'));
