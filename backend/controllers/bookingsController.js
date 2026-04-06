@@ -1,6 +1,5 @@
 const MembershipBooking = require('../models/MembershipBooking');
 
-
 const createBooking = async (req, res) => {
   try {
     const {
@@ -37,7 +36,7 @@ const createBooking = async (req, res) => {
 };
 
 
-const getAllBookings = async (req, res) => {
+const getBookings = async (req, res) => {
   try {
 
     const bookings = await MembershipBooking.find()
@@ -125,7 +124,7 @@ const updateBookingStatus = async (req, res) => {
 
 module.exports = {
   createBooking,
-  getAllBookings,
+  getBookings,
   getBookingById,
   updateBookingStatus,
 };

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getPlans, createPlan, updatePlan, deletePlan } = require('../controllers/plansController');
+const { getPlans, createPlan, updatePlan, deletePlan } = require('../controllers/planController');
 
 router.get('/', getPlans);
 router.post('/', createPlan);
