@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { createTrainerBooking, getTrainerBookings } = require('../controllers/trainerBookingsController');
+const { createTrainerBooking, getAllTrainerBookings } = require('../controllers/trainerBookingsController');
 
 router.post('/', createTrainerBooking);
-router.get('/', getTrainerBookings);
+router.get('/', getAllTrainerBookings);
 
 module.exports = router;

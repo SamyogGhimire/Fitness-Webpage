@@ -263,7 +263,6 @@ Falls back to 30-second polling if WebSocket is unavailable.
 ```env
 # Backend .env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/gymdb
 FRONTEND_URL=http://localhost:5173
 NODE_ENV=development
 ```
