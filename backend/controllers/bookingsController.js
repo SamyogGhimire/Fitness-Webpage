@@ -10,6 +10,7 @@ const createBooking = async (req, res) => {
       startDate,
     } = req.body;
 
+    // Validate required fields
     if (!fullName || !email || !phone || !selectedPlan || !startDate) {
       return res.status(400).json({
         success: false,
@@ -17,13 +18,18 @@ const createBooking = async (req, res) => {
       });
     }
 
-
+    // Create booking — qrToken is auto generated in model
     const booking = await MembershipBooking.create(req.body);
 
     res.status(201).json({
       success: true,
       message: 'Membership booked successfully!',
       bookingId: booking.bookingId,
+
+      // ─── NEW — send qrToken to frontend ───
+      qrToken: booking.qrToken,
+      // ──────────────────────────────────────
+
       data: booking,
     });
 
@@ -35,10 +41,8 @@ const createBooking = async (req, res) => {
   }
 };
 
-
-const getBookings = async (req, res) => {
+const getAllBookings = async (req, res) => {
   try {
-
     const bookings = await MembershipBooking.find()
       .sort({ createdAt: -1 });
 
@@ -58,7 +62,6 @@ const getBookings = async (req, res) => {
 
 const getBookingById = async (req, res) => {
   try {
-
     const booking = await MembershipBooking.findOne({
       bookingId: req.params.id,
     });
@@ -73,6 +76,42 @@ const getBookingById = async (req, res) => {
     res.status(200).json({
       success: true,
       data: booking,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const getBookingByQRToken = async (req, res) => {
+  try {
+    // Find booking using the qrToken from the QR code
+    const booking = await MembershipBooking.findOne({
+      qrToken: req.params.token,
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid QR code — booking not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        fullName: booking.fullName,
+        email: booking.email,
+        phone: booking.phone,
+        selectedPlan: booking.selectedPlan,
+        startDate: booking.startDate,
+        paymentStatus: booking.paymentStatus,
+        bookingId: booking.bookingId,
+        qrToken: booking.qrToken,
+      },
     });
 
   } catch (error) {
@@ -124,7 +163,8 @@ const updateBookingStatus = async (req, res) => {
 
 module.exports = {
   createBooking,
-  getBookings,
+  getAllBookings,
   getBookingById,
+  getBookingByQRToken,  
   updateBookingStatus,
 };
