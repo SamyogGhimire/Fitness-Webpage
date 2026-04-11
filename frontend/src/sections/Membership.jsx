@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getPlans, bookMembership } from '../services/api';
 import Modal from '../components/Modal';
+import QRCodeDisplay from '../components/QRCodeDisplay'; 
 
 const FALLBACK_PLANS = [
   {
@@ -96,10 +97,12 @@ function BookingForm({ plan, onClose }) {
     paymentStatus: 'pending',
   });
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(null);
   const [error, setError] = useState('');
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const [bookingResult, setBookingResult] = useState(null);
+ 
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -107,66 +110,113 @@ function BookingForm({ plan, onClose }) {
     setError('');
     try {
       const res = await bookMembership(form);
-      setSuccess(res.data.bookingId);
+
+      // ─── NEW — save booking result with qrToken ──
+      setBookingResult({
+        bookingId: res.data.bookingId,
+        qrToken: res.data.qrToken,
+        fullName: form.fullName,
+        plan: plan?.name,
+      });
+
     } catch (err) {
-      setError(err.response?.data?.message || 'Booking failed. Please try again.');
+      setError(
+        err.response?.data?.message || 'Booking failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  if (success) {
+ if (bookingResult) {
     return (
-      <div className="text-center py-8">
-        <div className="text-6xl mb-4">🎉</div>
-        <h3 className="font-display text-3xl text-white mb-2">BOOKING CONFIRMED!</h3>
-        <p className="text-brand-muted mb-4">Your membership has been booked successfully.</p>
-        <div className="bg-brand-red/10 border border-brand-red/30 p-4 mb-6">
-          <div className="text-xs text-brand-muted uppercase tracking-widest">Booking ID</div>
-          <div className="font-mono text-brand-red text-lg">{success}</div>
-        </div>
-        <p className="text-brand-muted text-sm mb-6">We'll contact you within 24 hours to complete payment and get you started!</p>
-        <button onClick={onClose} className="btn-primary">Done</button>
-      </div>
+      <QRCodeDisplay
+        bookingId={bookingResult.bookingId}
+        qrToken={bookingResult.qrToken}
+        fullName={bookingResult.fullName}
+        plan={bookingResult.plan}
+      />
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="card-dark p-4 mb-6">
-        <div className="text-xs text-brand-muted uppercase tracking-widest">Selected Plan</div>
+        <div className="text-xs text-brand-muted uppercase tracking-widest">
+          Selected Plan
+        </div>
         <div className="font-display text-2xl text-white">{plan?.name}</div>
-        <div className="text-brand-red font-semibold">₹{plan?.price?.toLocaleString()} / {plan?.duration}</div>
+        <div className="text-brand-red font-semibold">
+          ₹{plan?.price?.toLocaleString()} / {plan?.duration}
+        </div>
       </div>
 
-      {error && <div className="bg-red-900/30 border border-red-500/50 text-red-400 p-3 text-sm">{error}</div>}
+      {error && (
+        <div className="bg-red-900/30 border border-red-500/50 text-red-400 p-3 text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="label-dark">Full Name *</label>
-          <input name="fullName" required value={form.fullName} onChange={handleChange} placeholder="John Doe" className="input-dark" />
+          <input
+            name="fullName"
+            required
+            value={form.fullName}
+            onChange={handleChange}
+            placeholder="John Doe"
+            className="input-dark"
+          />
         </div>
         <div>
           <label className="label-dark">Phone Number *</label>
-          <input name="phone" required value={form.phone} onChange={handleChange} placeholder="+91 9876543210" className="input-dark" />
+          <input
+            name="phone"
+            required
+            value={form.phone}
+            onChange={handleChange}
+            placeholder="+91 9876543210"
+            className="input-dark"
+          />
         </div>
       </div>
 
       <div>
         <label className="label-dark">Email Address *</label>
-        <input type="email" name="email" required value={form.email} onChange={handleChange} placeholder="john@example.com" className="input-dark" />
+        <input
+          type="email"
+          name="email"
+          required
+          value={form.email}
+          onChange={handleChange}
+          placeholder="john@example.com"
+          className="input-dark"
+        />
       </div>
 
       <div>
         <label className="label-dark">Start Date *</label>
-        <input type="date" name="startDate" required value={form.startDate} onChange={handleChange} min={new Date().toISOString().split('T')[0]} className="input-dark" />
+        <input
+          type="date"
+          name="startDate"
+          required
+          value={form.startDate}
+          onChange={handleChange}
+          min={new Date().toISOString().split('T')[0]}
+          className="input-dark"
+        />
       </div>
 
       <div className="bg-yellow-900/20 border border-yellow-500/30 p-3 text-xs text-yellow-400">
-        💳 Payment will be collected at the gym during your first visit. Online payment gateway coming soon.
+        💳 Payment collected at gym on first visit.
       </div>
 
-      <button type="submit" disabled={loading} className="btn-primary w-full py-4">
+      <button
+        type="submit"
+        disabled={loading}
+        className="btn-primary w-full py-4"
+      >
         {loading ? 'Processing...' : 'Confirm Booking'}
       </button>
     </form>
