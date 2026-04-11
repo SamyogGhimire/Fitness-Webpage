@@ -9,7 +9,7 @@ const VisitTrackingSchema = new mongoose.Schema(
     },
     checkInTime: {
       type: Date,
-      default: Date.now, 
+      default: Date.now,
     },
     checkOutTime: {
       type: Date,
@@ -20,6 +20,18 @@ const VisitTrackingSchema = new mongoose.Schema(
       enum: ['inside', 'left'],
       default: 'inside',
     },
+
+    qrToken: {
+      type: String,
+      default: null,
+
+    },
+    bookingId: {
+      type: String,
+      default: null,
+
+    },
+
   },
   {
     timestamps: true,
