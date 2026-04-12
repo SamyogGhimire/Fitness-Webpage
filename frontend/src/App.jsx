@@ -10,8 +10,17 @@ import Location from './sections/Location';
 import Testimonials from './sections/Testimonials';
 import Contact from './sections/Contact';
 import Footer from './components/Footer';
+import AdminScanner from './pages/AdminScanner';
+
+const getPath = () => window.location.pathname;
 
 export default function App() {
+  const path = getPath();
+
+  if (path === '/admin' || path === '/admin/') {
+    return <AdminScanner />;
+  }
+
   return (
     <div className="min-h-screen bg-brand-dark text-white font-body">
       <Navbar />
