@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getPlans, bookMembership } from '../services/api';
 import Modal from '../components/Modal';
-import QRCodeDisplay from '../components/QRCodeDisplay'; 
+import QRCodeDisplay from '../components/QRCodeDisplay';
+import PaymentButton from '../components/PaymentButton';
 
 const FALLBACK_PLANS = [
   {
@@ -10,7 +11,12 @@ const FALLBACK_PLANS = [
     duration: '1 Day',
     price: 299,
     description: 'Perfect for a one-time gym experience.',
-    benefits: ['Full gym access', 'Locker room', 'Free WiFi', 'Water station'],
+    benefits: [
+      'Full gym access',
+      'Locker room',
+      'Free WiFi',
+      'Water station',
+    ],
     badge: '',
   },
   {
@@ -19,7 +25,13 @@ const FALLBACK_PLANS = [
     duration: '1 Month',
     price: 1999,
     description: 'Ideal for building a consistent fitness routine.',
-    benefits: ['Unlimited gym access', 'Group classes', 'Locker room', 'Nutrition guide', 'Free WiFi'],
+    benefits: [
+      'Unlimited gym access',
+      'Group classes',
+      'Locker room',
+      'Nutrition guide',
+      'Free WiFi',
+    ],
     badge: 'Popular',
   },
   {
@@ -28,14 +40,22 @@ const FALLBACK_PLANS = [
     duration: '1 Year',
     price: 14999,
     description: 'Best value for serious athletes.',
-    benefits: ['Unlimited gym access', 'All group classes', 'Personal trainer (2/mo)', 'Locker & towel service', 'Diet consultation', 'Priority booking', 'Guest passes (2)'],
+    benefits: [
+      'Unlimited gym access',
+      'All group classes',
+      'Personal trainer (2/mo)',
+      'Locker & towel service',
+      'Diet consultation',
+      'Priority booking',
+      'Guest passes (2)',
+    ],
     badge: 'Best Value',
   },
 ];
 
+//  Plan Card 
 function PlanCard({ plan, onBook }) {
   const isPopular = plan.badge === 'Popular';
-  const isBest = plan.badge === 'Best Value';
 
   return (
     <div
@@ -44,24 +64,36 @@ function PlanCard({ plan, onBook }) {
       }`}
     >
       {plan.badge && (
-        <div className={`absolute -top-3 left-6 tag-red text-xs`}>{plan.badge}</div>
+        <div className="absolute -top-3 left-6 tag-red text-xs">
+          {plan.badge}
+        </div>
       )}
 
       <div className="p-8 flex flex-col flex-1">
         <div className="mb-6">
-          <div className="text-brand-muted text-xs uppercase tracking-widest mb-2">{plan.duration}</div>
-          <div className="font-display text-4xl text-white">{plan.name}</div>
+          <div className="text-brand-muted text-xs uppercase tracking-widest mb-2">
+            {plan.duration}
+          </div>
+          <div className="font-display text-4xl text-white">
+            {plan.name}
+          </div>
         </div>
 
         <div className="mb-6">
           <div className="flex items-baseline gap-2">
             <span className="text-brand-muted text-lg">₹</span>
-            <span className="font-display text-6xl text-white">{plan.price.toLocaleString()}</span>
+            <span className="font-display text-6xl text-white">
+              {plan.price.toLocaleString()}
+            </span>
           </div>
-          <div className="text-brand-muted text-xs mt-1">per {plan.duration.toLowerCase()}</div>
+          <div className="text-brand-muted text-xs mt-1">
+            per {plan.duration.toLowerCase()}
+          </div>
         </div>
 
-        <p className="text-brand-muted text-sm mb-6 leading-relaxed">{plan.description}</p>
+        <p className="text-brand-muted text-sm mb-6 leading-relaxed">
+          {plan.description}
+        </p>
 
         <ul className="flex-1 space-y-3 mb-8">
           {plan.benefits.map((b) => (
@@ -87,142 +119,323 @@ function PlanCard({ plan, onBook }) {
   );
 }
 
-function BookingForm({ plan, onClose }) {
+//  Booking Steps 
+// Step 1 → Fill form
+// Step 2 → Pay with Razorpay
+// Step 3 → See QR code
+
+function BookingModal({ plan, onClose }) {
+  // Steps: 'form' → 'payment' → 'success'
+  const [step, setStep] = useState('form');
+
   const [form, setForm] = useState({
     fullName: '',
     email: '',
     phone: '',
     selectedPlan: plan?.name || '',
     startDate: '',
+    amount: plan?.price || 0,
     paymentStatus: 'pending',
   });
+
+  const [bookingData, setBookingData] = useState(null);
+  // { bookingId, qrToken, fullName, plan, amount }
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const [bookingResult, setBookingResult] = useState(null);
- 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  // Step 1 — Submit form → create booking → go to payment
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    try {
-      const res = await bookMembership(form);
 
-      // ─── NEW — save booking result with qrToken ──
-      setBookingResult({
+    try {
+      const res = await bookMembership({
+        ...form,
+        amount: plan?.price,
+      });
+
+      // Save booking details for payment step
+      setBookingData({
         bookingId: res.data.bookingId,
         qrToken: res.data.qrToken,
         fullName: form.fullName,
+        email: form.email,
+        phone: form.phone,
         plan: plan?.name,
+        amount: plan?.price,
       });
+
+      // Move to payment step
+      setStep('payment');
 
     } catch (err) {
       setError(
-        err.response?.data?.message || 'Booking failed. Please try again.'
+        err.response?.data?.message || 'Booking failed. Try again.'
       );
     } finally {
       setLoading(false);
     }
   };
 
- if (bookingResult) {
-    return (
-      <QRCodeDisplay
-        bookingId={bookingResult.bookingId}
-        qrToken={bookingResult.qrToken}
-        fullName={bookingResult.fullName}
-        plan={bookingResult.plan}
-      />
-    );
-  }
+  // Step 2 — Payment success → show QR
+  const handlePaymentSuccess = (paymentData) => {
+    setBookingData((prev) => ({
+      ...prev,
+      ...paymentData,
+    }));
+    setStep('success');
+  };
+
+  // Step 2 — Payment failed
+  const handlePaymentFailure = (err) => {
+    setError('Payment failed. Please try again.');
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="card-dark p-4 mb-6">
-        <div className="text-xs text-brand-muted uppercase tracking-widest">
-          Selected Plan
-        </div>
-        <div className="font-display text-2xl text-white">{plan?.name}</div>
-        <div className="text-brand-red font-semibold">
-          ₹{plan?.price?.toLocaleString()} / {plan?.duration}
-        </div>
-      </div>
+    <div>
+      {/* Progress indicator */}
+      {step !== 'success' && (
+        <div className="flex items-center gap-2 mb-6">
+          {/* Step 1 */}
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                step === 'form'
+                  ? 'bg-brand-red text-white'
+                  : 'bg-green-600 text-white'
+              }`}
+            >
+              {step === 'form' ? '1' : '✓'}
+            </div>
+            <span
+              className={`text-xs uppercase tracking-widest ${
+                step === 'form' ? 'text-white' : 'text-green-400'
+              }`}
+            >
+              Details
+            </span>
+          </div>
 
-      {error && (
-        <div className="bg-red-900/30 border border-red-500/50 text-red-400 p-3 text-sm">
-          {error}
+          {/* Connector */}
+          <div
+            className={`flex-1 h-px ${
+              step === 'payment' || step === 'success'
+                ? 'bg-brand-red'
+                : 'bg-brand-border'
+            }`}
+          />
+
+          {/* Step 2 */}
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                step === 'payment'
+                  ? 'bg-brand-red text-white'
+                  : step === 'success'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-brand-border text-brand-muted'
+              }`}
+            >
+              {step === 'success' ? '✓' : '2'}
+            </div>
+            <span
+              className={`text-xs uppercase tracking-widest ${
+                step === 'payment'
+                  ? 'text-white'
+                  : step === 'success'
+                  ? 'text-green-400'
+                  : 'text-brand-muted'
+              }`}
+            >
+              Payment
+            </span>
+          </div>
+
+          {/* Connector */}
+          <div
+            className={`flex-1 h-px ${
+              step === 'success' ? 'bg-brand-red' : 'bg-brand-border'
+            }`}
+          />
+
+          {/* Step 3 */}
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                step === 'success'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-brand-border text-brand-muted'
+              }`}
+            >
+              {step === 'success' ? '✓' : '3'}
+            </div>
+            <span
+              className={`text-xs uppercase tracking-widest ${
+                step === 'success' ? 'text-green-400' : 'text-brand-muted'
+              }`}
+            >
+              Your QR
+            </span>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="label-dark">Full Name *</label>
-          <input
-            name="fullName"
-            required
-            value={form.fullName}
-            onChange={handleChange}
-            placeholder="John Doe"
-            className="input-dark"
+      {/* ── STEP 1: Form ── */}
+      {step === 'form' && (
+        <form onSubmit={handleFormSubmit} className="space-y-4">
+          {/* Plan summary */}
+          <div className="card-dark p-4 mb-2">
+            <div className="text-xs text-brand-muted uppercase tracking-widest">
+              Selected Plan
+            </div>
+            <div className="font-display text-2xl text-white">
+              {plan?.name}
+            </div>
+            <div className="text-brand-red font-semibold">
+              ₹{plan?.price?.toLocaleString()} / {plan?.duration}
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-red-900/30 border border-red-500/50 text-red-400 p-3 text-sm">
+              {error}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="label-dark">Full Name *</label>
+              <input
+                name="fullName"
+                required
+                value={form.fullName}
+                onChange={handleChange}
+                placeholder="John Doe"
+                className="input-dark"
+              />
+            </div>
+            <div>
+              <label className="label-dark">Phone *</label>
+              <input
+                name="phone"
+                required
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="+91 9876543210"
+                className="input-dark"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="label-dark">Email *</label>
+            <input
+              type="email"
+              name="email"
+              required
+              value={form.email}
+              onChange={handleChange}
+              placeholder="john@example.com"
+              className="input-dark"
+            />
+          </div>
+
+          <div>
+            <label className="label-dark">Start Date *</label>
+            <input
+              type="date"
+              name="startDate"
+              required
+              value={form.startDate}
+              onChange={handleChange}
+              min={new Date().toISOString().split('T')[0]}
+              className="input-dark"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full py-4 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Processing...
+              </>
+            ) : (
+              'Continue to Payment →'
+            )}
+          </button>
+        </form>
+      )}
+
+      {/* ── STEP 2: Payment ── */}
+      {step === 'payment' && bookingData && (
+        <div className="space-y-4">
+          <div className="text-center mb-4">
+            <div className="font-display text-2xl text-white mb-1">
+              COMPLETE PAYMENT
+            </div>
+            <p className="text-brand-muted text-sm">
+              One last step — pay securely via Razorpay
+            </p>
+          </div>
+
+          {error && (
+            <div className="bg-red-900/30 border border-red-500/50 text-red-400 p-3 text-sm">
+              {error}
+            </div>
+          )}
+
+          <PaymentButton
+            amount={bookingData.amount}
+            bookingId={bookingData.bookingId}
+            memberName={bookingData.fullName}
+            email={bookingData.email}
+            phone={bookingData.phone}
+            plan={bookingData.plan}
+            onSuccess={handlePaymentSuccess}
+            onFailure={handlePaymentFailure}
           />
+
+          {/* Back button */}
+          <button
+            onClick={() => setStep('form')}
+            className="w-full text-brand-muted hover:text-white text-xs uppercase tracking-widest py-2 transition-colors"
+          >
+            ← Back to Details
+          </button>
         </div>
+      )}
+
+      {/* ── STEP 3: Success + QR ── */}
+      {step === 'success' && bookingData && (
         <div>
-          <label className="label-dark">Phone Number *</label>
-          <input
-            name="phone"
-            required
-            value={form.phone}
-            onChange={handleChange}
-            placeholder="+91 9876543210"
-            className="input-dark"
+          <QRCodeDisplay
+            bookingId={bookingData.bookingId}
+            qrToken={bookingData.qrToken}
+            fullName={bookingData.fullName}
+            plan={bookingData.plan}
           />
+          <button
+            onClick={onClose}
+            className="btn-outline w-full py-3 mt-4 text-xs"
+          >
+            Close
+          </button>
         </div>
-      </div>
-
-      <div>
-        <label className="label-dark">Email Address *</label>
-        <input
-          type="email"
-          name="email"
-          required
-          value={form.email}
-          onChange={handleChange}
-          placeholder="john@example.com"
-          className="input-dark"
-        />
-      </div>
-
-      <div>
-        <label className="label-dark">Start Date *</label>
-        <input
-          type="date"
-          name="startDate"
-          required
-          value={form.startDate}
-          onChange={handleChange}
-          min={new Date().toISOString().split('T')[0]}
-          className="input-dark"
-        />
-      </div>
-
-      <div className="bg-yellow-900/20 border border-yellow-500/30 p-3 text-xs text-yellow-400">
-        💳 Payment collected at gym on first visit.
-      </div>
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="btn-primary w-full py-4"
-      >
-        {loading ? 'Processing...' : 'Confirm Booking'}
-      </button>
-    </form>
+      )}
+    </div>
   );
 }
 
+// Main Section 
 export default function Membership() {
   const [plans, setPlans] = useState(FALLBACK_PLANS);
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -230,7 +443,9 @@ export default function Membership() {
 
   useEffect(() => {
     getPlans()
-      .then((res) => { if (res.data.data?.length) setPlans(res.data.data); })
+      .then((res) => {
+        if (res.data.data?.length) setPlans(res.data.data);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -246,7 +461,7 @@ export default function Membership() {
             MEMBERSHIP <span className="text-brand-red">PLANS</span>
           </h2>
           <p className="section-subtitle mt-4 max-w-xl mx-auto">
-            Transparent pricing with no hidden fees. Choose the plan that fits your lifestyle.
+            Transparent pricing. No hidden fees. Pay securely online.
           </p>
         </div>
 
@@ -257,15 +472,25 @@ export default function Membership() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((plan) => (
-              <PlanCard key={plan._id} plan={plan} onBook={setSelectedPlan} />
+              <PlanCard
+                key={plan._id}
+                plan={plan}
+                onBook={setSelectedPlan}
+              />
             ))}
           </div>
         )}
       </div>
 
       {selectedPlan && (
-        <Modal title="Book Membership" onClose={() => setSelectedPlan(null)}>
-          <BookingForm plan={selectedPlan} onClose={() => setSelectedPlan(null)} />
+        <Modal
+          title="Book Membership"
+          onClose={() => setSelectedPlan(null)}
+        >
+          <BookingModal
+            plan={selectedPlan}
+            onClose={() => setSelectedPlan(null)}
+          />
         </Modal>
       )}
     </section>
