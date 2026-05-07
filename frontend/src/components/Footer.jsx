@@ -43,7 +43,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <div className="font-display text-4xl text-white">START YOUR JOURNEY TODAY.</div>
-            <div className="text-red-200 text-sm mt-1">Join 2,000+ members who transformed their lives at IronPeak.</div>
+            <div className="text-red-200 text-sm mt-1">Join 2,000+ members who transformed their lives at our Gym.</div>
           </div>
           <button
             onClick={() => scrollTo('#membership')}
@@ -65,7 +65,7 @@ export default function Footer() {
                   <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
                 </svg>
               </div>
-              <span className="font-display text-2xl text-white tracking-wider">IRONPEAK</span>
+              <span className="font-display text-2xl text-white tracking-wider">Fitness Hub</span>
             </div>
             <p className="text-brand-muted text-sm leading-relaxed mb-6">
               Bangalore's premier fitness destination. Transforming bodies and lives since 2009 with elite coaching and world-class facilities.
@@ -138,8 +138,8 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="mailto:hello@ironpeak.in" className="text-brand-muted hover:text-white text-sm flex gap-2 transition-colors">
-                  <span>✉️</span> hello@ironpeak.in
+                <a href="mailto:hello@fitnesshub.in" className="text-brand-muted hover:text-white text-sm flex gap-2 transition-colors">
+                  <span>✉️</span> hello@fitnesshub.in
                 </a>
               </li>
             </ul>
@@ -166,7 +166,7 @@ export default function Footer() {
       <div className="border-t border-brand-border">
         <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="text-brand-muted text-xs">
-            © {year} IronPeak Fitness Center. All rights reserved.
+            © {year}  Fitness Hub. All rights reserved.
           </div>
           <div className="flex gap-6">
             {['Privacy Policy', 'Terms of Service', 'Refund Policy'].map((p) => (

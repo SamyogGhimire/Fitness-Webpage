@@ -115,7 +115,7 @@ export default function AdminScanner() {
             </div>
             <div>
               <div className="font-display text-xl text-white">
-                IRONPEAK ADMIN
+                 ADMIN
               </div>
               <div className="text-brand-muted text-xs">Entry Scanner</div>
             </div>

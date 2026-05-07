@@ -13,8 +13,8 @@ const SUBJECTS = [
 
 const CONTACT_INFO = [
   { icon: '📞', label: 'Phone', value: '+91 80 1234 5678', href: 'tel:+918012345678' },
-  { icon: '✉️', label: 'Email', value: 'hello@ironpeak.in', href: 'mailto:hello@ironpeak.in' },
-  { icon: '📍', label: 'Address', value: '#42, Koramangala 5th Block, Bengaluru – 560095', href: '#location' },
+  { icon: '✉️', label: 'Email', value: 'hello@fitness.in', href: 'mailto:hello@fitness.in' },
+  { icon: '📍', label: 'Address', value: '#Bengaluru – 560095', href: '#location' },
   { icon: '🕐', label: 'Support Hours', value: 'Mon–Sat · 9 AM – 8 PM', href: null },
 ];
 

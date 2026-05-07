@@ -28,7 +28,7 @@ export default function QRCodeDisplay({ bookingId, qrToken, fullName, plan }) {
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.download = `ironpeak-qr-${bookingId}.png`;
+    link.download = `fitnesshub-qr-${bookingId}.png`;
     link.href = qrDataUrl;
     link.click();
   };

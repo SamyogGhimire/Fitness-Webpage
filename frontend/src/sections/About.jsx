@@ -46,14 +46,14 @@ export default function About() {
 
           {/* Right: Text */}
           <div>
-            <span className="tag-red mb-4 inline-block">About IronPeak</span>
+            <span className="tag-red mb-4 inline-block">About </span>
             <h2 className="section-title mb-6">
               MORE THAN
               <br />
               <span className="text-brand-red">A GYM.</span>
             </h2>
             <p className="section-subtitle mb-6">
-              Founded in 2009, IronPeak Fitness Center has been Bangalore's premier destination for serious fitness. We
+              Founded in 2009,  Fitness Center has been Bangalore's premier destination for serious fitness. We
               combine cutting-edge equipment with elite coaching to help every member surpass their goals.
             </p>
             <p className="section-subtitle mb-10">

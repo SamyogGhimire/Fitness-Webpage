@@ -46,7 +46,7 @@ export default function Navbar() {
             </svg>
           </div>
           <span className="font-display text-2xl tracking-wider text-white group-hover:text-brand-red transition-colors">
-            IRONPEAK
+            FITNESS HUB
           </span>
         </a>
 

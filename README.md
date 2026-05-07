@@ -1,4 +1,4 @@
-# 🏋️ IronPeak Fitness Center — Full-Stack Gym Management Website
+# 🏋️ Fitness Center — Full-Stack Gym Management Website
 
 A production-grade, full-stack gym management website built with **React**, **Node.js/Express**, **MongoDB**, and **Socket.IO**.
 

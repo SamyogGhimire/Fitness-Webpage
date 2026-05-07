@@ -6,7 +6,7 @@ const TESTIMONIALS = [
     role: 'Software Engineer · Member since 2022',
     avatar: 'https://randomuser.me/api/portraits/men/11.jpg',
     rating: 5,
-    text: 'IronPeak completely transformed my approach to fitness. The trainers are knowledgeable, the equipment is world-class, and the atmosphere keeps you motivated. Lost 18kg in 8 months!',
+    text: 'FitnessHub completely transformed my approach to fitness. The trainers are knowledgeable, the equipment is world-class, and the atmosphere keeps you motivated. Lost 18kg in 8 months!',
     result: '18kg lost in 8 months',
   },
   {
@@ -38,7 +38,7 @@ const TESTIMONIALS = [
     role: 'Doctor · Member since 2022',
     avatar: 'https://randomuser.me/api/portraits/men/66.jpg',
     rating: 5,
-    text: 'As a physician, I can say IronPeak maintains the highest hygiene and safety standards I\'ve seen at any gym. The diet consultation service is evidence-based and effective.',
+    text: 'As a physician, I can say  maintains the highest hygiene and safety standards I\'ve seen at any gym. The diet consultation service is evidence-based and effective.',
     result: '12% body fat reduction',
   },
   {
@@ -102,7 +102,7 @@ export default function Testimonials() {
             SUCCESS <span className="text-brand-red">STORIES</span>
           </h2>
           <p className="section-subtitle mt-4 max-w-xl mx-auto">
-            Don't take our word for it — hear from members who transformed their lives at IronPeak.
+            Don't take our word for it — hear from members who transformed their lives at .
           </p>
         </div>
 

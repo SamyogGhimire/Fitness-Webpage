@@ -14,7 +14,7 @@ function InfoCard() {
   return (
     <div className="card-dark p-8 h-full flex flex-col">
       <span className="tag-red mb-6 inline-block">Find Us</span>
-      <h3 className="font-display text-4xl text-white mb-6">IRONPEAK FITNESS</h3>
+      <h3 className="font-display text-4xl text-white mb-6">FITNESS HUB</h3>
 
       {/* Address */}
       <div className="flex gap-4 mb-6 pb-6 border-b border-brand-border">
@@ -22,8 +22,8 @@ function InfoCard() {
         <div>
           <div className="text-xs text-brand-muted uppercase tracking-widest mb-1">Address</div>
           <div className="text-white text-sm leading-relaxed">
-            #42, 3rd Floor, Koramangala 5th Block<br />
-            Bengaluru, Karnataka – 560095<br />
+            <br />
+            Bengaluru, Karnataka<br />
             India
           </div>
         </div>
@@ -55,13 +55,13 @@ function InfoCard() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-brand-red">✉️</span>
-          <a href="mailto:hello@ironpeak.in" className="text-white hover:text-brand-red text-sm transition-colors">
-            hello@ironpeak.in
+          <a href="mailto:hello@fitnesshub.in" className="text-white hover:text-brand-red text-sm transition-colors">
+            hello@fitnesshub.in
           </a>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-brand-red">🌐</span>
-          <span className="text-brand-muted text-sm">www.ironpeak.in</span>
+          <span className="text-brand-muted text-sm">www.fitnesshub.in</span>
         </div>
       </div>
 
@@ -125,7 +125,7 @@ export default function Location() {
 
         marker.bindPopup(
           `<div style="font-family: 'DM Sans', sans-serif; color: #fff; background: #111; padding: 12px; border-left: 3px solid #E8192C; min-width: 160px;">
-            <strong style="font-size: 14px;">IronPeak Fitness</strong><br/>
+            <strong style="font-size: 14px;">Fitness Hub</strong><br/>
             <span style="font-size: 12px; color: #aaa;">Koramangala, Bangalore</span><br/>
             <span style="font-size: 11px; color: #E8192C;">⭐ 4.9 · Open Now</span>
           </div>`,

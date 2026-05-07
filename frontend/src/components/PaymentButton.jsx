@@ -28,7 +28,7 @@ export default function PaymentButton({
         key: keyId,
         amount: amount * 100, // in paise
         currency: 'INR',
-        name: 'IronPeak Fitness Center',
+        name: 'Fitness Center',
         description: `${plan} Membership`,
         image: 'https://i.imgur.com/n5tjHFD.png',
         order_id: orderId,
