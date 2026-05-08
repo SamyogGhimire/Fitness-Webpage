@@ -36,3 +36,6 @@ const handlePayment = async () => {
     setLoading(false);
   }
 };
+
+
+export default PaymentButton;
