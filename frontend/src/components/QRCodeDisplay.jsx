@@ -107,4 +107,3 @@ export default function QRCodeDisplay({ bookingId, qrToken, fullName, plan }) {
     </div>
   );
 }
-export default QRCodeDisplay;
