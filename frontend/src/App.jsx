@@ -12,12 +12,12 @@ import Contact from './sections/Contact';
 import Footer from './components/Footer';
 import AdminScanner from './pages/AdminScanner';
 
-const getPath = () => window.location.pathname;
-
 export default function App() {
-  const path = getPath();
+  const path = window.location.pathname;
+  const params = new URLSearchParams(window.location.search);
 
-  if (path === '/admin' || path === '/admin/') {
+  // Support both /admin and ?admin=true
+  if (path === '/admin' || params.get('admin') === 'true') {
     return <AdminScanner />;
   }
 
