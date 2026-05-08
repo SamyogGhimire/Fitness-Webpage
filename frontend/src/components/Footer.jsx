@@ -130,7 +130,7 @@ export default function Footer() {
             <ul className="space-y-3 mb-8">
               <li className="text-brand-muted text-sm flex gap-2">
                 <span>📍</span>
-                <span>#42, Koramangala 5th Block,<br />Bengaluru – 560095</span>
+                <span>Kanakapura Road,<br />Bengaluru – 562112</span>
               </li>
               <li>
                 <a href="tel:+918012345678" className="text-brand-muted hover:text-white text-sm flex gap-2 transition-colors">
