@@ -2,11 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getLiveCrowd, getHourlyStats, checkIn } from '../services/api';
 
 let socket = null;
-try {
-  const { io } = await import('socket.io-client');
-  const SOCKET_URL = import.meta.env.VITE_API_URL || '';
-  socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
-} catch (_) {}
 
 const CAPACITY = 50;
 
@@ -146,13 +141,9 @@ export default function LiveCrowd() {
     const interval = setInterval(fetchCrowd, 30000);
 
     // Socket.IO real-time
-    if (socket) {
-      socket.on('crowdUpdate', () => { fetchCrowd(); setLastPing(new Date()); });
-    }
-
-    return () => {
-      clearInterval(interval);
-      if (socket) socket.off('crowdUpdate');
+    // No socket in production — polling handles updates
+  return () => {
+  clearInterval(interval);
     };
   }, [fetchCrowd]);
 
