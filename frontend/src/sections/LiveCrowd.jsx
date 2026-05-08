@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getLiveCrowd, getHourlyStats, checkIn } from '../services/api';
 
-// Socket.IO optional — graceful fallback to polling
 let socket = null;
 try {
   const { io } = await import('socket.io-client');
-  socket = io('/', { transports: ['websocket', 'polling'] });
+  const SOCKET_URL = import.meta.env.VITE_API_URL || '';
+  socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
 } catch (_) {}
 
 const CAPACITY = 50;
