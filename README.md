@@ -10,7 +10,7 @@ A full-stack gym management website built with React, Node.js, MongoDB, and Sock
 - Backend: Node.js, Express.js
 - Database: MongoDB Atlas + Mongoose
 - Real-Time: Socket.IO
-- Payment: Mock Payment System (Razorpay-ready)
+- Payment: Mock Payment System
 - Map: Leaflet.js + OpenStreetMap
 - Hosting: Vercel (frontend), Railway (backend)
 
