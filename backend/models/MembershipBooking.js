@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 
 const MembershipBookingSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     fullName: {
       type: String,
       required: [true, 'Full name is required'],
@@ -28,10 +33,7 @@ const MembershipBookingSchema = new mongoose.Schema(
     amount: {
       type: Number,
       default: 0,
-      // stores amount in rupees
     },
-
-    // Payment Fields 
     paymentStatus: {
       type: String,
       enum: ['pending', 'completed', 'failed'],
@@ -40,25 +42,19 @@ const MembershipBookingSchema = new mongoose.Schema(
     razorpayOrderId: {
       type: String,
       default: null,
-      // from Razorpay when order is created
     },
     razorpayPaymentId: {
       type: String,
       default: null,
-      // from Razorpay after payment success
     },
     razorpaySignature: {
       type: String,
       default: null,
-      // used to verify payment is genuine
     },
     paidAt: {
       type: Date,
       default: null,
-      // timestamp of successful payment
     },
-    
-    //QR Fields 
     bookingId: {
       type: String,
       unique: true,
@@ -77,7 +73,6 @@ const MembershipBookingSchema = new mongoose.Schema(
   }
 );
 
-// Auto generate bookingId and qrToken
 MembershipBookingSchema.pre('save', function (next) {
   if (!this.bookingId) {
     this.bookingId =
@@ -97,7 +92,4 @@ MembershipBookingSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model(
-  'MembershipBooking',
-  MembershipBookingSchema
-);
+module.exports = mongoose.model('MembershipBooking', MembershipBookingSchema);
