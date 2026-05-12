@@ -30,7 +30,8 @@ app.use('/api/trainers',         require('./routes/trainers'));
 app.use('/api/trainer-bookings', require('./routes/trainerBookings'));
 app.use('/api/crowd',            require('./routes/crowd'));
 app.use('/api/contact',          require('./routes/contact'));
-app.use('/api/payments',         require('./routes/payments')); // ← NEW
+app.use('/api/payments',         require('./routes/payments')); 
+app.use('/api/auth', require('./routes/auth'));
 
 // Health Check 
 app.get('/api/health', (req, res) => {
