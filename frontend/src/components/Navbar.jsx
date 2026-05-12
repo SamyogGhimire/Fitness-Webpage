@@ -95,15 +95,9 @@ export default function Navbar() {
               <>
                 <button
                   onClick={() => setModal('login')}
-                  className="text-xs font-semibold uppercase tracking-widest text-brand-light hover:text-white transition-colors"
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => setModal('signup')}
                   className="btn-primary text-xs py-2.5 px-6"
                 >
-                  Join Now
+                  Login / Sign Up
                 </button>
               </>
             )}
@@ -169,15 +163,9 @@ export default function Navbar() {
               <>
                 <button
                   onClick={() => { setMenuOpen(false); setModal('login'); }}
-                  className="text-left text-sm font-semibold uppercase tracking-widest text-brand-light hover:text-brand-red py-3 border-b border-brand-border/50 transition-colors"
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => { setMenuOpen(false); setModal('signup'); }}
                   className="btn-primary text-center mt-4 text-xs py-3"
                 >
-                  Join Now
+                  Login / Sign Up
                 </button>
               </>
             )}
