@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getTrainers, bookTrainer } from '../services/api';
 import Modal from '../components/Modal';
+import { useAuth } from '../context/AuthContext';
 
 const FALLBACK_TRAINERS = [
   { _id: '1', name: 'Rahul Sharma', specialization: 'Strength & Powerlifting', experience: 8, image: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 4.9, availableModes: ['At Gym', 'Video Call'], clients: 120 },
@@ -21,7 +22,17 @@ function StarRating({ rating }) {
   );
 }
 
-function TrainerCard({ trainer, onHire }) {
+function TrainerCard({ trainer, onHire, onLoginRequired }) {
+  const { user } = useAuth();
+
+  const handleHire = () => {
+    if (!user) {
+      onLoginRequired();
+      return;
+    }
+    onHire(trainer);
+  };
+
   return (
     <div className="card-dark group hover:border-brand-red/50 transition-all duration-300 overflow-hidden">
       <div className="relative h-56 overflow-hidden">
@@ -40,7 +51,13 @@ function TrainerCard({ trainer, onHire }) {
         <h3 className="font-display text-2xl text-white mb-1">{trainer.name}</h3>
 
         <div className="flex items-center gap-3 mb-4">
-          <StarRating rating={trainer.rating} />
+          <div className="flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <span key={s} className={s <= Math.round(trainer.rating) ? 'star-filled' : 'star-empty'}>
+                ★
+              </span>
+            ))}
+          </div>
           <span className="text-brand-muted text-xs">({trainer.rating})</span>
         </div>
 
@@ -64,7 +81,7 @@ function TrainerCard({ trainer, onHire }) {
         </div>
 
         <button
-          onClick={() => onHire(trainer)}
+          onClick={handleHire}
           className="w-full border border-brand-border hover:border-brand-red hover:text-brand-red text-white text-xs font-semibold uppercase tracking-widest py-3 transition-all duration-300"
         >
           Hire Trainer
@@ -204,6 +221,7 @@ export default function Trainers() {
   const [selectedTrainer, setSelectedTrainer] = useState(null);
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const specializations = ['All', ...new Set(FALLBACK_TRAINERS.map((t) => t.specialization.split(' & ')[0]))];
 
@@ -214,22 +232,29 @@ export default function Trainers() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = filter === 'All' ? trainers : trainers.filter((t) => t.specialization.includes(filter));
+  const filtered = filter === 'All'
+    ? trainers
+    : trainers.filter((t) => t.specialization.includes(filter));
+
+  const handleLoginClick = () => {
+    setShowLoginPrompt(false);
+    const event = new CustomEvent('openLoginModal');
+    window.dispatchEvent(event);
+  };
 
   return (
     <section id="trainers" className="py-24 bg-black relative">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <span className="tag-red mb-4 inline-block">Feature 2</span>
+          <span className="tag-red mb-4 inline-block">Expert Trainers</span>
           <h2 className="section-title">
             HIRE A <span className="text-brand-red">TRAINER</span>
           </h2>
           <p className="section-subtitle mt-4 max-w-xl mx-auto">
-            Work with certified professionals tailored to your specific goals. At gym, your place, or online.
+            Work with certified professionals. At gym, your place, or online.
           </p>
         </div>
 
-        {/* Filter tabs */}
         <div className="flex flex-wrap justify-center gap-2 mb-10">
           {specializations.map((spec) => (
             <button
@@ -253,15 +278,51 @@ export default function Trainers() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((trainer) => (
-              <TrainerCard key={trainer._id} trainer={trainer} onHire={setSelectedTrainer} />
+              <TrainerCard
+                key={trainer._id}
+                trainer={trainer}
+                onHire={setSelectedTrainer}
+                onLoginRequired={() => setShowLoginPrompt(true)}
+              />
             ))}
           </div>
         )}
       </div>
 
+      {showLoginPrompt && (
+        <Modal title="Login Required" onClose={() => setShowLoginPrompt(false)}>
+          <div className="text-center py-6">
+            <div className="text-5xl mb-4">🔐</div>
+            <h3 className="font-display text-2xl text-white mb-2">
+              LOGIN REQUIRED
+            </h3>
+            <p className="text-brand-muted text-sm mb-6">
+              You need to login or create an account before hiring a trainer.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLoginPrompt(false)}
+                className="btn-outline flex-1 py-3 text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLoginClick}
+                className="btn-primary flex-1 py-3 text-xs"
+              >
+                Login / Sign Up
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {selectedTrainer && (
         <Modal title="Hire Trainer" onClose={() => setSelectedTrainer(null)}>
-          <HireForm trainer={selectedTrainer} onClose={() => setSelectedTrainer(null)} />
+          <HireForm
+            trainer={selectedTrainer}
+            onClose={() => setSelectedTrainer(null)}
+          />
         </Modal>
       )}
     </section>
