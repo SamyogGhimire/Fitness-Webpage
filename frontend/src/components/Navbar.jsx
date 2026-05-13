@@ -25,7 +25,15 @@ export default function Navbar() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+  
+    // Listen for login modal trigger from other components
+    const openLogin = () => setModal('login');
+    window.addEventListener('openLoginModal', openLogin);
+  
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('openLoginModal', openLogin);
+    };
   }, []);
 
   const handleNav = (href) => {
@@ -41,15 +49,15 @@ export default function Navbar() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? 'bg-black/95 backdrop-blur-sm border-b border-brand-border'
-            : 'bg-transparent'
+            : 'bg-black/70'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16 md:h-20">
+        <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
 
           {/* Logo */}
           <button
             onClick={() => handleNav('#home')}
-            className="flex items-center gap-3 group"
+            className="flex items-center gap-3 group flex-shrink-0"
           >
             <div className="w-9 h-9 bg-brand-red flex items-center justify-center">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
@@ -57,30 +65,30 @@ export default function Navbar() {
               </svg>
             </div>
             <span className="font-display text-2xl tracking-wider text-white group-hover:text-brand-red transition-colors">
-              FitnessHub
+              FITNESSHUB
             </span>
           </button>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          {/* Desktop Nav — center */}
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
             {NAV_LINKS.map((link) => (
               <button
                 key={link.href}
                 onClick={() => handleNav(link.href)}
-                className="text-xs font-semibold uppercase tracking-widest text-brand-light hover:text-white transition-colors duration-200"
+                className="text-xs font-semibold uppercase tracking-widest text-brand-light hover:text-white transition-colors duration-200 whitespace-nowrap"
               >
                 {link.label}
               </button>
             ))}
           </nav>
 
-          {/* Auth Buttons Desktop */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Auth — right */}
+          <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
             {user ? (
               <>
                 <button
                   onClick={() => setModal('dashboard')}
-                  className="text-xs font-semibold uppercase tracking-widest text-brand-light hover:text-white transition-colors border border-brand-border px-4 py-2"
+                  className="text-xs font-semibold uppercase tracking-widest text-white border border-brand-border hover:border-brand-red px-4 py-2 transition-colors"
                 >
                   My Account
                 </button>
@@ -92,48 +100,30 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <>
-                <button
-                  onClick={() => setModal('login')}
-                  className="btn-primary text-xs py-2.5 px-6"
-                >
-                  Login / Sign Up
-                </button>
-              </>
+              <button
+                onClick={() => setModal('login')}
+                className="btn-primary text-xs py-2.5 px-6"
+              >
+                Login / Sign Up
+              </button>
             )}
           </div>
 
-          {/* Hamburger */}
+          {/* Hamburger — mobile */}
           <button
-            className="md:hidden flex flex-col gap-1.5 p-2"
+            className="lg:hidden flex flex-col gap-1.5 p-2 flex-shrink-0"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
           >
-            <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-                menuOpen ? 'rotate-45 translate-y-2' : ''
-              }`}
-            />
-            <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-                menuOpen ? 'opacity-0' : ''
-              }`}
-            />
-            <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-                menuOpen ? '-rotate-45 -translate-y-2' : ''
-              }`}
-            />
+            <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+            <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
           </button>
         </div>
 
         {/* Mobile Menu */}
-        <div
-          className={`md:hidden overflow-hidden transition-all duration-300 bg-black/98 border-t border-brand-border ${
-            menuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-          }`}
-        >
-          <nav className="flex flex-col px-6 py-4 gap-1">
+        <div className={`lg:hidden transition-all duration-300 bg-black border-t border-brand-border overflow-hidden ${menuOpen ? 'max-h-screen' : 'max-h-0'}`}>
+          <div className="flex flex-col px-6 py-4 gap-1">
             {NAV_LINKS.map((link) => (
               <button
                 key={link.href}
@@ -144,32 +134,32 @@ export default function Navbar() {
               </button>
             ))}
 
-            {user ? (
-              <>
-                <button
-                  onClick={() => { setMenuOpen(false); setModal('dashboard'); }}
-                  className="text-left text-sm font-semibold uppercase tracking-widest text-brand-light hover:text-brand-red py-3 border-b border-brand-border/50 transition-colors"
-                >
-                  My Account
-                </button>
-                <button
-                  onClick={() => { setMenuOpen(false); logout(); }}
-                  className="text-left text-sm font-semibold uppercase tracking-widest text-brand-muted hover:text-brand-red py-3 transition-colors"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
+            <div className="pt-3">
+              {user ? (
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => { setMenuOpen(false); setModal('dashboard'); }}
+                    className="text-left text-sm font-semibold uppercase tracking-widest text-white border border-brand-border px-4 py-3 transition-colors"
+                  >
+                    My Account
+                  </button>
+                  <button
+                    onClick={() => { setMenuOpen(false); logout(); }}
+                    className="text-left text-sm font-semibold uppercase tracking-widest text-brand-muted hover:text-brand-red py-2 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
                 <button
                   onClick={() => { setMenuOpen(false); setModal('login'); }}
-                  className="btn-primary text-center mt-4 text-xs py-3"
+                  className="btn-primary w-full text-center text-xs py-3"
                 >
                   Login / Sign Up
                 </button>
-              </>
-            )}
-          </nav>
+              )}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -179,13 +169,11 @@ export default function Navbar() {
           <Login onSwitch={() => setModal('signup')} onClose={closeModal} />
         </Modal>
       )}
-
       {modal === 'signup' && (
         <Modal title="Create Account" onClose={closeModal}>
           <Signup onSwitch={() => setModal('login')} onClose={closeModal} />
         </Modal>
       )}
-
       {modal === 'dashboard' && (
         <Modal title="My Account" onClose={closeModal}>
           <Dashboard onClose={closeModal} />
