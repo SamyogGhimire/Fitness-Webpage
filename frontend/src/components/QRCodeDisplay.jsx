@@ -88,6 +88,7 @@ export default function QRCodeDisplay({ bookingId, qrToken, fullName, plan }) {
         </div>
         <ul className="text-yellow-300/80 text-xs space-y-1">
           <li>→ Screenshot or download this QR code</li>
+          <li>→ Open the FitnessHub app and go to My Account to get your QR code</li>
           <li>→ Show it to the admin at gym entrance</li>
           <li>→ Admin scans it to check you in</li>
           <li>→ Scan again when leaving to check out</li>
