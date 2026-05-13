@@ -166,7 +166,7 @@ export default function AdminScanner() {
             </div>
             <h1 className="font-display text-4xl text-white">ADMIN ACCESS</h1>
             <p className="text-brand-muted text-sm mt-2">
-              IronPeak Entry Scanner
+              FitnessHub Entry Scanner
             </p>
           </div>
 
@@ -183,7 +183,7 @@ export default function AdminScanner() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@ironpeak.in"
+                placeholder="admin@fitnesshub.in"
                 className="input-dark"
                 required
                 autoFocus
@@ -242,7 +242,7 @@ export default function AdminScanner() {
             </div>
             <div>
               <div className="font-display text-lg text-white">
-                IRONPEAK ADMIN
+                FITNESSHUB ADMIN
               </div>
               <div className="text-brand-muted text-xs">
                 {adminName}

@@ -50,7 +50,7 @@ export default function Signup({ onSwitch, onClose }) {
     <div>
       <div className="text-center mb-8">
         <h2 className="font-display text-4xl text-white mb-2">CREATE ACCOUNT</h2>
-        <p className="text-brand-muted text-sm">Join IronPeak and manage your membership</p>
+        <p className="text-brand-muted text-sm">Join FitnessHub and manage your membership</p>
       </div>
 
       {error && (
